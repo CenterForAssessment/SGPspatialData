@@ -21,7 +21,7 @@ for (i in list.files(pattern="zip")) {
 
 ### Start merging .shp files
 
-for (i in tmp.unique.indices[1]) {
+for (i in tmp.unique.indices) {
         tmp <- readLines(paste("tl_2012_", i, "_unsd.shp.xml", sep=""))
         tmp.abb <- gsub("\t|placekey|<|>|/", "", tmp[grep("placekey", tmp)][5])
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
@@ -38,26 +38,26 @@ for (i in tmp.unique.indices[1]) {
 				system(paste("ogr2ogr -update -append USA_Districts.shp", j, "-nln USA_Districts"))
 			}
 		}
-		system(paste("topojson -o",  paste(tmp.new.name, "_100_Percent.topojson", sep=""), paste(tmp.new.name, "shp", sep=".")))
-		system(paste("topojson -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", paste(tmp.new.name, "shp", sep=".")))
+		system(paste("topojson -p District=NAME -p District -o",  paste(tmp.new.name, "_100_Percent.topojson", sep=""), paste(tmp.new.name, "shp", sep=".")))
+		system(paste("topojson -p District=NAME -p District -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", paste(tmp.new.name, "shp", sep=".")))
 	} else {
 		if (tmp.abb %in% state.abb) {
 			system(paste("ogr2ogr -update -append USA_Districts.shp", tmp.shp.file.names, "-nln USA_Districts"))
 		}
 		system(paste("topojson -p District=NAME -p District -o",  paste(tmp.new.name, "_100_Percent.topojson", sep=""), tmp.shp.file.names))
-		system(paste("topojson -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", tmp.shp.file.names))
+		system(paste("topojson -p District=NAME -p District -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", tmp.shp.file.names))
 	}
 }
 
-#system(paste("topojson -o USA_Districts_100_percent.topojson USA_Districts.shp"))
-#system(paste("topojson -o USA_Districts_50_percent.topojson --simplify-proportion .50 USA_Districts.shp"))
-#system(paste("topojson -o USA_Districts_25_percent.topojson --simplify-proportion .25 USA_Districts.shp"))
-#system(paste("topojson -o USA_Districts_20_percent.topojson --simplify-proportion .20 USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_100_percent.topojson USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_50_percent.topojson --simplify-proportion .50 USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_25_percent.topojson --simplify-proportion .25 USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_20_percent.topojson --simplify-proportion .20 USA_Districts.shp"))
 
 
 ### Move topojson files
 
-#system(paste("mv *.topojson .."))
+system(paste("mv *.topojson .."))
 
 
 ### Reset working directory
