@@ -4,7 +4,9 @@
 ###
 #####################################################################
 
-### Function to get abbreviation
+### Misc functions
+
+"%w/o%" <- function(x, y) x[!x %in% y] #--  x without y
 
 
 ### Copy and Unzip files
@@ -12,7 +14,7 @@
 setwd("Source_Files")
 system("cp Tiger_Line_Zip_Files/*.zip .")
 
-tmp.unique.indices <- unique(sapply(strsplit(list.files(pattern="zip"), "_"), '[', 3))
+tmp.unique.indices <- unique(sapply(strsplit(list.files(pattern="zip"), "_"), '[', 3)) %w/o% "us"
 
 for (i in list.files(pattern="zip")) {
 	system(paste("unzip", i))
@@ -27,7 +29,8 @@ for (i in tmp.unique.indices) {
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
 	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_2012_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
 	if (i==tmp.unique.indices[1]) {
-		system(paste("ogr2ogr USA_Districts.shp", tail(tmp.shp.file.names, 1))) 
+		system("ogr2ogr USA_Districts.shp tl_2012_us_state.shp") 
+#		system(paste("ogr2ogr USA_Districts.shp", tail(tmp.shp.file.names, 1))) 
 	}
 
 	if (length(tmp.shp.file.names) > 1) {
@@ -49,10 +52,10 @@ for (i in tmp.unique.indices) {
 	}
 }
 
-system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_100_percent.topojson USA_Districts.shp"))
-system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_50_percent.topojson --simplify-proportion .50 USA_Districts.shp"))
-system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_25_percent.topojson --simplify-proportion .25 USA_Districts.shp"))
-system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_20_percent.topojson USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_100_percent.topojson USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_50_percent.topojson --simplify-proportion .50 USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_25_percent.topojson --simplify-proportion .25 USA_Districts.shp"))
+system(paste("topojson -p District=NAME -p District -o USA_Districts_20_percent.topojson --simplify-proportion .20 USA_Districts.shp"))
 
 
 ### Move topojson files
