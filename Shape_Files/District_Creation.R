@@ -54,9 +54,6 @@ for (i in tmp.unique.indices) {
 }
 
 system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts.json USA_Districts.shp"))
-#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_50_percent.json --simplify-proportion .50 USA_Districts.shp"))
-#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_25_percent.json --simplify-proportion .25 USA_Districts.shp"))
-#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_20_percent.json --simplify-proportion .20 USA_Districts.shp"))
 
 
 ### Move topojson files
