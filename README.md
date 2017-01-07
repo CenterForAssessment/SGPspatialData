@@ -1,7 +1,7 @@
 SGPspatialData
 ==============
 
-Repository for United States district shape files
+Repository for United States School District Shape Files
 -------------------------------------------------------------
 This repository contains [topoJSON](https://github.com/topojson/topojson) shape files for school districts in each state in addition to a shape
 file for the continental United States. The files are for use in data visualizations. The files are derived from
