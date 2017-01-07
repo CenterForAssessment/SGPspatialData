@@ -30,7 +30,7 @@ for (i in tmp.unique.indices) {
         tmp <- suppressWarnings(readLines(paste("tl_", current.year, "_", i, "_unsd.shp.xml", sep="")))
 		tmp.abb <- tmp[grep("placekey", tmp)+1][9]
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
-	tmp.shp.file.names <- grep(".xml|elsd|scsd", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
+	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
 	if (i==tmp.unique.indices[1]) {
 		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp tl_", current.year, "_us_state.shp", sep=""))
 		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp", tail(tmp.shp.file.names, 1)))
@@ -53,7 +53,7 @@ for (i in tmp.unique.indices) {
 	}
 }
 
-system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_.json USA_Districts.shp"))
+system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts.json USA_Districts.shp"))
 #system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_50_percent.json --simplify-proportion .50 USA_Districts.shp"))
 #system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_25_percent.json --simplify-proportion .25 USA_Districts.shp"))
 #system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_20_percent.json --simplify-proportion .20 USA_Districts.shp"))
