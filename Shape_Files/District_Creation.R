@@ -30,7 +30,7 @@ for (i in tmp.unique.indices) {
         tmp <- suppressWarnings(readLines(paste("tl_", current.year, "_", i, "_unsd.shp.xml", sep="")))
 		tmp.abb <- tmp[grep("placekey", tmp)+1][9]
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
-	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
+	tmp.shp.file.names <- grep(".xml|elsd|scsd", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
 	if (i==tmp.unique.indices[1]) {
 		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp tl_", current.year, "_us_state.shp", sep=""))
 		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp", tail(tmp.shp.file.names, 1)))
@@ -44,26 +44,24 @@ for (i in tmp.unique.indices) {
 				system(paste("ogr2ogr -update -append USA_Districts.shp", j, "-nln USA_Districts"))
 			}
 		}
-		system(paste("topojson -q 1e5 -p District=NAME -p District -o",  paste(tmp.new.name, "_100_Percent.topojson", sep=""), paste(tmp.new.name, "shp", sep=".")))
-		system(paste("topojson -q 1e5 -p District=NAME -p District -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", paste(tmp.new.name, "shp", sep=".")))
+		system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o",  paste(tmp.new.name, ".json", sep=""), paste(tmp.new.name, "shp", sep=".")))
 	} else {
-		if (tmp.abb %in% state.abb) {
+		if (tmp.abb %in% setdiff(state.abb, c("AK", "HI"))) {
 			system(paste("ogr2ogr -update -append USA_Districts.shp", tmp.shp.file.names, "-nln USA_Districts"))
 		}
-		system(paste("topojson -q 1e5 -p District=NAME -p District -o",  paste(tmp.new.name, "_100_Percent.topojson", sep=""), tmp.shp.file.names))
-		system(paste("topojson -q 1e5 -p District=NAME -p District -o",  paste(tmp.new.name, "_25_Percent.topojson", sep=""), "--simplify-proportion .25", tmp.shp.file.names))
+		system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o",  paste(tmp.new.name, ".json", sep=""), tmp.shp.file.names))
 	}
 }
 
-system(paste("topojson -p District=NAME -p District -o USA_Districts_100_percent.topojson USA_Districts.shp"))
-system(paste("topojson -p District=NAME -p District -o USA_Districts_50_percent.topojson --simplify-proportion .50 USA_Districts.shp"))
-system(paste("topojson -p District=NAME -p District -o USA_Districts_25_percent.topojson --simplify-proportion .25 USA_Districts.shp"))
-system(paste("topojson -p District=NAME -p District -o USA_Districts_20_percent.topojson --simplify-proportion .20 USA_Districts.shp"))
+system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_100_percent.json USA_Districts.shp"))
+#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_50_percent.json --simplify-proportion .50 USA_Districts.shp"))
+#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_25_percent.json --simplify-proportion .25 USA_Districts.shp"))
+#system(paste("topojson -q 1e5 -s 7e-7 -p District=NAME -p District -o USA_Districts_20_percent.json --simplify-proportion .20 USA_Districts.shp"))
 
 
 ### Move topojson files
 
-system(paste("mv *.topojson .."))
+system(paste("mv *.json .."))
 
 
 ### Reset working directory
