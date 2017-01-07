@@ -4,14 +4,17 @@
 ###
 #####################################################################
 
+### Parameters
+
+current.year <- 2016
+
 ### Misc functions
 
-"%w/o%" <- function(x, y) x[!x %in% y] #--  x without y
-
+"%w/o%" <- function(x, y) x[!x %in% y]
 
 ### Copy and Unzip files
 
-setwd("Source_Files")
+setwd(paste("Source_Files", current.year, sep="_"))
 system("cp Tiger_Line_Zip_Files/*.zip .")
 
 tmp.unique.indices <- unique(sapply(strsplit(list.files(pattern="zip"), "_"), '[', 3)) %w/o% "us"
@@ -24,17 +27,17 @@ for (i in list.files(pattern="zip")) {
 ### Start merging .shp files
 
 for (i in tmp.unique.indices) {
-        tmp <- readLines(paste("tl_2012_", i, "_unsd.shp.xml", sep=""))
-        tmp.abb <- gsub("\t|placekey|<|>|/", "", tmp[grep("placekey", tmp)][5])
+        tmp <- suppressWarnings(readLines(paste("tl_", current.year, "_", i, "_unsd.shp.xml", sep="")))
+		tmp.abb <- tmp[grep("placekey", tmp)+1][9]
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
-	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_2012_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
+	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
 	if (i==tmp.unique.indices[1]) {
-		system("ogr2ogr USA_Districts.shp tl_2012_us_state.shp") 
-#		system(paste("ogr2ogr USA_Districts.shp", tail(tmp.shp.file.names, 1))) 
+		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp tl_", current.year, "_us_state.shp", sep=""))
+		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp", tail(tmp.shp.file.names, 1)))
 	}
 
 	if (length(tmp.shp.file.names) > 1) {
-		system(paste("ogr2ogr", paste(tmp.abb, "Districts.shp", sep="_"), tail(tmp.shp.file.names, 1))) 
+		system(paste("ogr2ogr -f 'ESRI Shapefile'", paste(tmp.abb, "Districts.shp", sep="_"), tail(tmp.shp.file.names, 1)))
 		for (j in tmp.shp.file.names) {
 			system(paste("ogr2ogr -update -append", paste(tmp.new.name, "shp", sep="."), j, "-nln", paste(tmp.abb, "Districts", sep="_")))
 			if (tmp.abb %in% state.abb) {
