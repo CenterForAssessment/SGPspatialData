@@ -1,7 +1,9 @@
 SGPspatialData
 ==============
 
-Repository for shape files and spatial data for SGP analyses.
+Repository for United States district shape files
 -------------------------------------------------------------
-
-[![Join the chat at https://gitter.im/CenterForAssessment/SGPspatialData](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/CenterForAssessment/SGPspatialData?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![License](http://img.shields.io/badge/license-GPL%203-brightgreen.svg?style=flat)](https://github.com/CenterForAssessment/SGPspatialData/blob/master/LICENSE.md)
+This repository contains [topoJSON](https://github.com/topojson/topojson) shape files for school districts in each state in addition to a shape
+file for the continental United States. The files are for use in data visualizations. The files are derived from
+[shape files](https://www.census.gov/did/www/schooldistricts/) created by the United States Census Bureau converted to topoJSON and made freely
+available by the [Center for Assessment](https://github.com/CenterForAssessment) for the use by others. Source code utilized to convert shape files to topoJSON is available [here](https://github.com/CenterForAssessment/SGPspatialData/blob/master/Shape_Files/District_Creation.R).

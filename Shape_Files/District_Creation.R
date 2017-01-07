@@ -1,8 +1,9 @@
-#####################################################################
+########################################################################################
 ###
-### Script to rename and convert shape files to geoJSON and topoJSON
+### Script to rename and convert shape files to topoJSON
+### All Shape files downloaded from https://www.census.gov/did/www/schooldistricts/
 ###
-#####################################################################
+########################################################################################
 
 ### Parameters
 
