@@ -10,4 +10,4 @@ available by the [Center for Assessment](https://github.com/CenterForAssessment)
 
 ### Examples
 
-* [Zoomable Wyoming Districts](http://bl.ocks.org/dbetebenner/dc95803c61970d4282e620b83ff2964a)
+* [Zoomable Map of Wyoming Districts](http://bl.ocks.org/dbetebenner/dc95803c61970d4282e620b83ff2964a)
