@@ -33,11 +33,11 @@ for (i in tmp.unique.indices) {
 	tmp.new.name <- paste(tmp.abb, "Districts", sep="_")
 	tmp.shp.file.names <- grep(".xml", grep(".shp", list.files(pattern=paste("tl_", current.year, "_", i, sep="")), value=TRUE), value=TRUE, invert=TRUE)
 	if (i==tmp.unique.indices[1]) {
-		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp tl_", current.year, "_us_state.shp", sep=""))
 		system(paste("ogr2ogr -f 'ESRI Shapefile' USA_Districts.shp", tail(tmp.shp.file.names, 1)))
 	}
 
 	if (length(tmp.shp.file.names) > 1) {
+		print(paste("STARTING", tmp.abb))
 		system(paste("ogr2ogr -f 'ESRI Shapefile'", paste(tmp.abb, "Districts.shp", sep="_"), tail(tmp.shp.file.names, 1)))
 		for (j in tmp.shp.file.names) {
 			system(paste("ogr2ogr -update -append", paste(tmp.new.name, "shp", sep="."), j, "-nln", paste(tmp.abb, "Districts", sep="_")))
@@ -51,34 +51,39 @@ for (i in tmp.unique.indices) {
 		system(paste("sed -i -e 's/", tmp.new.name, "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
 		file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
 		file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
+#		system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
+#		system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
+#		unlink(c("TEMP.json, TEMP_NO_PROPERTIES.json"))
 	} else {
+		print(paste("STARTING", tmp.abb))
 		system(paste("ogr2ogr -f 'ESRI Shapefile'", paste(tmp.abb, "Districts.shp", sep="_"), tail(tmp.shp.file.names, 1)))
 		if (tmp.abb %in% setdiff(state.abb, c("AK", "HI"))) {
 			system(paste("ogr2ogr -update -append USA_Districts.shp", tmp.shp.file.names, "-nln USA_Districts"))
 		}
 		system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -o TEMP.json",  tmp.shp.file.names))
 		system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o TEMP_NO_PROPERTIES.json",  tmp.shp.file.names))
-		system(paste("sed -i -e 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP.json", sep=""))
-		system(paste("sed -i -e 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
+		system(paste("sed -i 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP.json", sep=""))
+		system(paste("sed -i 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
 		file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
 		file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
+#		system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
+#		system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
+#		unlink(c("TEMP.json, TEMP_NO_PROPERTIES.json"))
 	}
 }
 
 system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME --id-property=+STATEFP -o USA_Districts.topojson USA_Districts.shp"))
-system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 --id-property=+STATEFP -o USA_Districts_ID.topojson USA_Districts.shp"))
 system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o USA_Districts_NO_PROPERTIES.topojson USA_Districts.shp"))
 system("sed -i -e 's/USA_Districts/districts/g' USA_Districts.topojson")
-system("sed -i -e 's/USA_Districts/districts/g' USA_Districts_ID.topojson")
 system("sed -i -e 's/USA_Districts/districts/g' USA_Districts_NO_PROPERTIES.topojson")
 
 
 ### Move topojson files
 
-dir.create(paste("../Topojson_", current.year, sep=""), showWarnings=FALSE)
-system(paste("mv *.topojson", paste("../Topojson_", current.year, sep="")))
+#dir.create(paste("../Topojson_", current.year, sep=""), showWarnings=FALSE)
+#system(paste("mv *.topojson", paste("../Topojson_", current.year, sep="")))
 
 
 ### Reset working directory
 
-setwd("..")
+#setwd("..")
