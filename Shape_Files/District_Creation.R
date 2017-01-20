@@ -5,27 +5,82 @@
 ###
 ########################################################################################
 
+### Load packages
+
+require(data.table)
+
+
 ### Parameters
 
 current.year <- 2016
+
 
 ### Misc functions
 
 "%w/o%" <- function(x, y) x[!x %in% y]
 
+
+### Load Data
+
+state.lookup <- fread("State_Codes.csv", colClasses=rep("character", 3))
+
+
 ### Copy and Unzip files
 
 setwd(paste("Source_Files", current.year, sep="_"))
-system("cp Tiger_Line_Zip_Files/*.zip .")
+system("cp Base_Files/*.zip .")
+system("unzip SCHOOLDISTRICT_SY1314_TL15.zip")
 
-tmp.unique.indices <- unique(sapply(strsplit(list.files(pattern="zip"), "_"), '[', 3)) %w/o% "us"
 
-for (i in list.files(pattern="zip")) {
-	system(paste("unzip", i))
+###################################################################
+###
+### Create state files
+###
+###################################################################
+
+system("mapshaper schooldistrict_sy1314_tl15.shp -split STATEFP -o")
+
+state.numbers <- sort(strhead(sapply(strsplit(list.files(pattern="shp$"), "-"), '[', 2), 2))
+
+for (i in state.numbers) {
+	print(paste("Starting:", state.abbreviation <- state.lookup[CODE==i]$STATE_ABBREVIATION))
+	system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -o TEMP.json", paste0("schooldistrict_sy1314_tl15-", i, ".shp")))
+	system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 -o TEMP_NO_PROPERTIES.json", paste0("schooldistrict_sy1314_tl15-", i, ".shp")))
+	system(paste("sed -i -e 's/", paste0("schooldistrict_sy1314_tl15-", i), "/districts/g' ", "TEMP.json", sep=""))
+	system(paste("sed -i -e 's/", paste0("schooldistrict_sy1314_tl15-", i), "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
+	file.rename("TEMP.json", paste0(state.abbreviation, "_Districts.topojson"))
+	file.rename("TEMP_NO_PROPERTIES.json", paste0(state.lookup[CODE==i]$STATE_ABBREVIATION, "_Districts_NO_PROPERTIES.topojson"))
 }
 
 
-### Start merging .shp files
+###################################################################
+###
+### Create national file
+###
+###################################################################
+
+system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -o TEMP.json schooldistrict_sy1314_tl15.shp")
+system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o TEMP_NO_PROPERTIES.json schooldistrict_sy1314_tl15.shp")
+system("sed -i -e 's/USA_Districts/districts/g' TEMP.json")
+system("sed -i -e 's/USA_Districts/districts/g' TEMP_NO_PROPERTIES.json")
+file.rename("TEMP.json", "USA_Districts.topojson")
+file.rename("TEMP_NO_PROPERTIES.json", "USA_Districts_NO_PROPERTIES.topojson")
+
+
+### Move topojson files
+
+dir.create(paste("../Topojson_", current.year, sep=""), showWarnings=FALSE)
+system(paste("mv *.topojson", paste("../Topojson_", current.year, sep="")))
+
+
+### Reset working directory
+
+setwd("..")
+
+
+
+
+
 
 for (i in tmp.unique.indices) {
     tmp <- suppressWarnings(readLines(paste("tl_", current.year, "_", i, "_unsd.shp.xml", sep="")))
@@ -49,11 +104,13 @@ for (i in tmp.unique.indices) {
 		system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "shp", sep=".")))
 		system(paste("sed -i -e 's/", tmp.new.name, "/districts/g' ", "TEMP.json", sep=""))
 		system(paste("sed -i -e 's/", tmp.new.name, "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
-		file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
-		file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
-#		system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
-#		system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
-#		unlink(c("TEMP.json, TEMP_NO_PROPERTIES.json"))
+		if (tmp.abb %in% state.abb) {
+			system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
+			system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
+		} else {
+			file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
+			file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
+		}
 	} else {
 		print(paste("STARTING", tmp.abb))
 		system(paste("ogr2ogr -f 'ESRI Shapefile'", paste(tmp.abb, "Districts.shp", sep="_"), tail(tmp.shp.file.names, 1)))
@@ -62,20 +119,38 @@ for (i in tmp.unique.indices) {
 		}
 		system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -o TEMP.json",  tmp.shp.file.names))
 		system(paste("topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o TEMP_NO_PROPERTIES.json",  tmp.shp.file.names))
-		system(paste("sed -i 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP.json", sep=""))
-		system(paste("sed -i 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
-		file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
-		file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
-#		system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
-#		system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
-#		unlink(c("TEMP.json, TEMP_NO_PROPERTIES.json"))
+		system(paste("sed -i -e 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP.json", sep=""))
+		system(paste("sed -i -e 's/", sub(".shp", "", tmp.shp.file.names), "/districts/g' ", "TEMP_NO_PROPERTIES.json", sep=""))
+		if (tmp.abb %in% state.abb) {
+			system(paste("topomerge state=districts < TEMP.json >", paste(tmp.new.name, ".topojson", sep="")))
+			system(paste("topomerge state=districts < TEMP_NO_PROPERTIES.json >", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep="")))
+		} else {
+			file.rename("TEMP.json", paste(tmp.new.name, ".topojson", sep=""))
+			file.rename("TEMP_NO_PROPERTIES.json", paste(tmp.new.name, "_NO_PROPERTIES.topojson", sep=""))
+		}
 	}
 }
 
-system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME --id-property=+STATEFP -o USA_Districts.topojson USA_Districts.shp"))
-system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o USA_Districts_NO_PROPERTIES.topojson USA_Districts.shp"))
-system("sed -i -e 's/USA_Districts/districts/g' USA_Districts.topojson")
-system("sed -i -e 's/USA_Districts/districts/g' USA_Districts_NO_PROPERTIES.topojson")
+###################################################################
+###
+### Create state shapefile from national file and Create
+### topoJSON file for nation
+###
+###################################################################
+
+system("mapshaper snap USA_Districts.shp -o USA_Districts_FIXED.shp")
+system("mapshaper USA_Districts_FIXED.shp -dissolve STATEFP -o USA_States.shp")
+#system("ogr2ogr -update -append USA_Districts_FIXED.shp USA_States.shp")
+#system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -o TEMP.json USA_Districts_FIXED.shp")
+
+
+
+
+#system(paste("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 --ignore-shapefile-properties true -o TEMP_NO_PROPERTIES.json USA_Districts.shp"))
+#system("sed -i -e 's/USA_Districts/districts/g' TEMP.json")
+#system("sed -i -e 's/USA_Districts/districts/g' TEMP_NO_PROPERTIES.json")
+#system("topomerge state=districts < TEMP.json > USA_Districts.topojson")
+#system("topomerge state=districts < TEMP_NO_PROPERTIES.json > USA_Districts_NO_PROPERTIES.topojson")
 
 
 ### Move topojson files
