@@ -31,12 +31,14 @@ system("unzip National_Assessment_of_Educational_Progress_20052015.zip")
 
 ####################################################################
 ###
-### Minor cleanup of base shape file
+### Minor cleanup of base shape files and creation of
+### continental US file
 ###
 ####################################################################
 
-system("mapshaper snap schooldistrict_sy1314_tl15.shp -o force")
+system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter 'NAME!=\"School District Not Defined\"' -o force")
 system("mapshaper snap National_Assessment_of_Educational_Progress_20052015.shp -o force")
+system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter 'STATEFP!=\"02\" && STATEFP!=\"15\" && STATEFP < \"57\"' -o continental_us.shp")
 
 
 ###################################################################
