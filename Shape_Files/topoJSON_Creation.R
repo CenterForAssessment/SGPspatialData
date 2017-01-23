@@ -81,7 +81,7 @@ system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7
 system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o TEMP_NO_PROPERTIES.json schooldistrict_sy1314_tl15.shp")
 system("sed -i -e 's/schooldistrict_sy1314_tl15/districts/g' TEMP.json")
 system("sed -i -e 's/\\\\u0000//g' TEMP.json")
-system("sed -i -e 's/schooldistrict_sy1314_tl15USA_Districts/districts/g' TEMP_NO_PROPERTIES.json")
+system("sed -i -e 's/schooldistrict_sy1314_tl15/districts/g' TEMP_NO_PROPERTIES.json")
 system("sed -i -e 's/\\\\u0000//g' TEMP_NO_PROPERTIES.json")
 file.rename("TEMP.json", "USA_Districts.topojson")
 file.rename("TEMP_NO_PROPERTIES.json", "USA_Districts_NO_PROPERTIES.topojson")
