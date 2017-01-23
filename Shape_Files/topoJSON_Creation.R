@@ -36,9 +36,7 @@ system("unzip National_Assessment_of_Educational_Progress_20052015.zip")
 ####################################################################
 
 system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter \"NAME!='School District Not Defined'\" -o force")
-#system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter 'STATEFP!=\"02\" && STATEFP!=\"15\" && STATEFP < \"57\"' -o continental_us_districts.shp")
 system("mapshaper snap National_Assessment_of_Educational_Progress_20052015.shp -o force")
-#system("mapshaper snap National_Assessment_of_Educational_Progress_20052015.shp -filter 'STATE_FIPS!=\"02\" && STATE_FIPS!=\"15\" && STATE_FIPS < \"57\"' -o continental_us_states.shp")
 
 
 ###################################################################
@@ -71,38 +69,22 @@ for (i in state.numbers) {
 ###################################################################
 
 system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=STATE_NAME -p state=STATE_FIPS -o STATE.json National_Assessment_of_Educational_Progress_20052015.shp")
-#system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=STATE_NAME -p state=STATE_FIPS -o STATE_continental_US.json continental_us_states.shp")
 system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o STATE_NO_PROPERTIES.json National_Assessment_of_Educational_Progress_20052015.shp")
-#system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o STATE_continental_US_NO_PROPERTIES.json continental_us_states.shp")
 system("sed -i -e 's/National_Assessment_of_Educational_Progress_20052015/states/g' STATE.json")
 system("sed -i -e 's/\\\\u0000//g' STATE.json")
 system("sed -i -e 's/National_Assessment_of_Educational_Progress_20052015/states/g' STATE_NO_PROPERTIES.json")
 system("sed -i -e 's/\\\\u0000//g' STATE_NO_PROPERTIES.json")
-#system("sed -i -e 's/National_Assessment_of_Educational_Progress_20052015/states/g' STATE_continental_US.json")
-#system("sed -i -e 's/\u0000//g' STATE_continental_US.json")
-#system("sed -i -e 's/National_Assessment_of_Educational_Progress_20052015/states/g' STATE_continental_US_NO_PROPERTIES.json")
-#system("sed -i -e 's/\u0000//g' STATE_continental_US_NO_PROPERTIES.json")
 file.rename("STATE.json", "USA_States.topojson")
 file.rename("STATE_NO_PROPERTIES.json", "USA_States_NO_PROPERTIES.topojson")
-#file.rename("STATE_continental_US.json", "USA_States_continental_us.topojson")
-#file.rename("STATE_continental_US_NO_PROPERTIES.json", "USA_States_continental_us_NO_PROPERTIES.topojson")
 
 system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -p state=STATEFP -o TEMP.json schooldistrict_sy1314_tl15.shp")
-#system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -p name=NAME -p state=STATEFP -o TEMP_continental_us.json continental_us_districts.shp")
 system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o TEMP_NO_PROPERTIES.json schooldistrict_sy1314_tl15.shp")
-#system("node --max_old_space_size=8192 /usr/local/share/npm/bin/topojson -s 7e-7 --q0=0 --q1=1e6 -o TEMP_continental_us_NO_PROPERTIES.json continental_us_districts.shp")
 system("sed -i -e 's/schooldistrict_sy1314_tl15/districts/g' TEMP.json")
 system("sed -i -e 's/\\\\u0000//g' TEMP.json")
-#system("sed -i -e 's/schooldistrict_sy1314_tl15/districts/g' TEMP_continental_us.json")
-#system("sed -i -e 's/\u0000//g' TEMP_continental_us.json")
 system("sed -i -e 's/schooldistrict_sy1314_tl15USA_Districts/districts/g' TEMP_NO_PROPERTIES.json")
 system("sed -i -e 's/\\\\u0000//g' TEMP_NO_PROPERTIES.json")
-#system("sed -i -e 's/schooldistrict_sy1314_tl15USA_Districts/districts/g' TEMP_continental_us_NO_PROPERTIES.json")
-#system("sed -i -e 's/\u0000//g' TEMP_continental_us_NO_PROPERTIES.json")
 file.rename("TEMP.json", "USA_Districts.topojson")
-#file.rename("TEMP_continental_us.json", "USA_Districts_continental_us.topojson")
 file.rename("TEMP_NO_PROPERTIES.json", "USA_Districts_NO_PROPERTIES.topojson")
-#file.rename("TEMP_continental_us_NO_PROPERTIES.json", "USA_Districts_continental_us_NO_PROPERTIES.topojson")
 
 system("mapshaper -i USA_Districts.topojson USA_States_NO_PROPERTIES.topojson combine-files -o USA_Districts_States.topojson format=topojson")
 system("mapshaper -i USA_Districts_NO_PROPERTIES.topojson USA_States_NO_PROPERTIES.topojson combine-files -o USA_Districts_States_NO_PROPERTIES.topojson format=topojson")
