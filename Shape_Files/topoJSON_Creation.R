@@ -35,7 +35,7 @@ system("unzip National_Assessment_of_Educational_Progress_20052015.zip")
 ###
 ####################################################################
 
-system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter \"NAME!='School District Not Defined'\" -o force")
+system("mapshaper snap  schooldistrict_sy1314_tl15.shp -filter \"NAME!='School District Not Defined' || (STATEFP!='09' && STATEFP!='17' && STATEFP!='18' && STATEFP!='25' && STATEFP!='26' && STATEFP!='34' && STATEFP!='36' && STATEFP!='39' && STATEFP!='42' && STATEFP!='44' && STATEFP!='55')\" -o force")
 system("mapshaper snap National_Assessment_of_Educational_Progress_20052015.shp -o force")
 
 
